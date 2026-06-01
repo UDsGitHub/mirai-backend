@@ -4,7 +4,10 @@
 - user_tag_preference
 - user_taste_profile
 - user_anime_entry
-- comment
+- discussion
+- discussion_reply
+- discussion_up_vote
+- discussion_reply_up_vote
 - connection
 - activity_event
 - recommendation_session
@@ -12,6 +15,11 @@
 - recommendation_share
 - catalog
 - catalog_item
+- anime
+- genre
+- anime_genre
+- tag
+- anime_tag
 
 
 ### User Profile table
@@ -52,23 +60,44 @@
 - computed_at
 
 
-### Comment table
-- comment_id
+### Discussion table
+- discussion_id
 - user_id
 - anime_id
-- comment_body
+- title
+- body
+- created_at
+- last_reply_at
+
+
+### Discussion Reply table
+- discussion_id
+- reply_id
+- user_id
+- body
 - parent_id
+- created_at
+
+
+### Discussion Vote table (only upvotes, if user toggles upvote, we delete entry)
+- discussion_id
+- user_id
+
+
+### Discussion Reply Vote table (only upvotes, if user toggles upvote, we delete entry)
+- reply_id
+- user_id
 
 
 ### Connection table
-- user_id
-- follow_id
+- follower_id
+- following_id
 
 
 ### Activity Event table
 - id
 - actor_id
-- verb - rated | completed | added_to_list | shared_rec
+- verb - rated | completed | added_to_list | shared_rec | started_discussion | replied_to_discussion
 - anime_id
 - metadata
 - created_at
@@ -108,4 +137,46 @@
 
 ### Catalog Item table
 - catalog_id
+- anime_id
+- sort_order
+
+
+### Anime table
+- id
+- external_id
+- title_romaji
+- title_english
+- synopsis
+- episode_count
+- status
+- season
+- season_year
+- average_score
+- popularity
+- banner_url
+- cover_url
+- trailer_url
+- synced_at
+
+
+### Genre table
+- id
+- genre
+
+
+### Anime Genre table
+- anime_id
+- genre_id
+
+
+### Tag table
+- id
+- external_id
+- name
+- category
+- is_adult
+
+
+### Anime Tag table
+- tag_id
 - anime_id
