@@ -1,24 +1,34 @@
-import { CanActivate, ExecutionContext, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
+import {
+  CanActivate,
+  ExecutionContext,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { Request } from 'express';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
-  private supabase: SupabaseClient;
+  private supabase: SupabaseClient | null = null;
 
-  constructor() {
-    this.initializeSupabaseClient();
-  }
+  constructor(private readonly configService: ConfigService) {}
 
-  private async initializeSupabaseClient() {
-    if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
-      throw new Error('SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY must be set');
+  private getSupabaseClient(): SupabaseClient {
+    if (!this.supabase) {
+      const url = this.configService.get<string>('SUPABASE_URL');
+      const key = this.configService.get<string>('SUPABASE_SERVICE_ROLE_KEY');
+
+      if (!url || !key) {
+        throw new Error(
+          'SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY must be set',
+        );
+      }
+
+      this.supabase = createClient(url, key);
     }
 
-    this.supabase = createClient(
-      process.env.SUPABASE_URL,
-      process.env.SUPABASE_SERVICE_ROLE_KEY,
-    );
+    return this.supabase;
   }
 
   private extractTokenFromHeader(request: Request): string | undefined {
@@ -26,21 +36,20 @@ export class AuthGuard implements CanActivate {
     return type === 'Bearer' ? token : undefined;
   }
 
-  async canActivate(
-    context: ExecutionContext,
-  ): Promise<boolean> {
-    if (!this.supabase)
-      await this.initializeSupabaseClient();
-
+  async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
     const token = this.extractTokenFromHeader(request);
 
-    if (!token)
+    if (!token) {
       throw new UnauthorizedException();
+    }
 
-    const { data, error } = await this.supabase.auth.getClaims(token);
-    if (error || !data?.claims)
+    const supabase = this.getSupabaseClient();
+    const { data, error } = await supabase.auth.getClaims(token);
+
+    if (error || !data?.claims) {
       throw new UnauthorizedException('Invalid Supabase token');
+    }
 
     request.user = data.claims;
     return true;
