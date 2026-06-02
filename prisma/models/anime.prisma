@@ -1,0 +1,74 @@
+model Anime {
+  id           String   @id @default(uuid()) @db.Uuid
+  externalId   Int      @unique @map("external_id")
+  titleRomaji  String   @map("title_romaji")
+  titleEnglish String?  @map("title_english")
+  synopsis     String?
+  episodeCount Int?     @map("episode_count")
+  status       String?
+  season       String?
+  seasonYear   Int?     @map("season_year")
+  averageScore Float?   @map("average_score")
+  popularity   Int?
+  bannerUrl    String?  @map("banner_url")
+  coverUrl     String?  @map("cover_url")
+  trailerUrl   String?  @map("trailer_url")
+  syncedAt     DateTime @map("synced_at") @db.Timestamptz
+
+  genres                AnimeGenre[]
+  tags                  AnimeTag[]
+  userEntries           UserAnimeEntry[]
+  discussions           Discussion[]
+  activityEvents        ActivityEvent[]
+  recommendationResults RecommendationResult[]
+  catalogItems          CatalogItem[]
+
+  @@index([externalId])
+  @@map("anime")
+}
+
+model Genre {
+  id   Int    @id @default(autoincrement())
+  name String @unique
+
+  animes      AnimeGenre[]
+  preferences UserGenrePreference[]
+
+  @@map("genre")
+}
+
+model AnimeGenre {
+  animeId String @map("anime_id") @db.Uuid
+  genreId Int    @map("genre_id")
+
+  anime Anime @relation(fields: [animeId], references: [id], onDelete: Cascade)
+  genre Genre @relation(fields: [genreId], references: [id], onDelete: Cascade)
+
+  @@id([animeId, genreId])
+  @@map("anime_genre")
+}
+
+model Tag {
+  id         Int     @id @default(autoincrement())
+  externalId Int     @unique @map("external_id")
+  name       String  @unique
+  category   String
+  isAdult    Boolean @default(false) @map("is_adult")
+
+  animes      AnimeTag[]
+  preferences UserTagPreference[]
+
+  @@index([externalId])
+  @@map("tag")
+}
+
+model AnimeTag {
+  animeId String @map("anime_id") @db.Uuid
+  tagId   Int    @map("tag_id")
+
+  anime Anime @relation(fields: [animeId], references: [id], onDelete: Cascade)
+  tag   Tag   @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([animeId, tagId])
+  @@map("anime_tag")
+}

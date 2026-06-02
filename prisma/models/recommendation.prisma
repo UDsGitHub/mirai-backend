@@ -1,0 +1,42 @@
+model RecommendationSession {
+  id         String   @id @default(uuid()) @db.Uuid
+  userId     String   @map("user_id")
+  promptText String   @map("prompt_text")
+  filters    Json?
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  user    UserProfile            @relation(fields: [userId], references: [userId], onDelete: Cascade)
+  results RecommendationResult[]
+  shares  RecommendationShare[]
+
+  @@index([userId, createdAt(sort: Desc)])
+  @@map("recommendation_session")
+}
+
+model RecommendationResult {
+  sessionId     String  @map("session_id") @db.Uuid
+  animeId       String  @map("anime_id") @db.Uuid
+  matchPercent  Float?  @map("match_percent")
+  explanation   String?
+
+  session RecommendationSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  anime   Anime                 @relation(fields: [animeId], references: [id], onDelete: Cascade)
+
+  @@id([sessionId, animeId])
+  @@map("recommendation_result")
+}
+
+model RecommendationShare {
+  id          String  @id @default(uuid()) @db.Uuid
+  fromUserId  String  @map("from_user_id")
+  toUserId    String? @map("to_user_id")
+  publicToken String? @unique @map("public_token")
+  sessionId   String  @map("session_id") @db.Uuid
+  message     String?
+
+  fromUser UserProfile           @relation("ShareFrom", fields: [fromUserId], references: [userId], onDelete: Cascade)
+  toUser   UserProfile?          @relation("ShareTo", fields: [toUserId], references: [userId], onDelete: Cascade)
+  session  RecommendationSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@map("recommendation_share")
+}

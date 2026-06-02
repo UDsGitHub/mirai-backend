@@ -1,0 +1,27 @@
+model Catalog {
+  id          String      @id @default(uuid()) @db.Uuid
+  title       String
+  slug        String      @unique
+  description String?
+  ownerUserId String?     @map("owner_user_id")
+  kind        CatalogKind
+
+  owner UserProfile? @relation(fields: [ownerUserId], references: [userId], onDelete: SetNull)
+  items CatalogItem[]
+
+  @@index([slug])
+  @@map("catalog")
+}
+
+model CatalogItem {
+  catalogId String @map("catalog_id") @db.Uuid
+  animeId   String @map("anime_id") @db.Uuid
+  sortOrder Int?   @map("sort_order")
+
+  catalog Catalog @relation(fields: [catalogId], references: [id], onDelete: Cascade)
+  anime   Anime   @relation(fields: [animeId], references: [id], onDelete: Cascade)
+
+  @@id([catalogId, animeId])
+  @@index([catalogId, sortOrder])
+  @@map("catalog_item")
+}

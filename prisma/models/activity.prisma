@@ -1,0 +1,15 @@
+model ActivityEvent {
+  id        String       @id @default(uuid()) @db.Uuid
+  actorId   String       @map("actor_id")
+  verb      ActivityVerb
+  animeId   String?      @map("anime_id") @db.Uuid
+  metadata  Json?
+  createdAt DateTime     @default(now()) @map("created_at") @db.Timestamptz
+
+  actor UserProfile @relation(fields: [actorId], references: [userId], onDelete: Cascade)
+  anime Anime?      @relation(fields: [animeId], references: [id], onDelete: SetNull)
+
+  @@index([actorId, createdAt(sort: Desc)])
+  @@index([createdAt(sort: Desc)])
+  @@map("activity_event")
+}

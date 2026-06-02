@@ -1,0 +1,23 @@
+enum AnimeEntryStatus {
+  planned
+  watching
+  completed
+  rewatching
+  paused
+  dropped
+}
+
+enum ActivityVerb {
+  rated
+  completed
+  added_to_list
+  shared_rec
+  started_discussion
+  replied_to_discussion
+}
+
+enum CatalogKind {
+  custom
+  ai_generated
+  editorial
+}

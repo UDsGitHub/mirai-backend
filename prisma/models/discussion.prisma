@@ -1,0 +1,58 @@
+model Discussion {
+  id          String    @id @default(uuid()) @map("discussion_id") @db.Uuid
+  userId      String    @map("user_id")
+  animeId     String    @map("anime_id") @db.Uuid
+  title       String
+  body        String
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  lastReplyAt DateTime? @map("last_reply_at") @db.Timestamptz
+
+  user    UserProfile        @relation(fields: [userId], references: [userId], onDelete: Cascade)
+  anime   Anime              @relation(fields: [animeId], references: [id], onDelete: Cascade)
+  replies DiscussionReply[]
+  upVotes DiscussionUpVote[]
+
+  @@index([animeId, createdAt(sort: Desc)])
+  @@index([animeId, lastReplyAt(sort: Desc)])
+  @@map("discussion")
+}
+
+model DiscussionReply {
+  id           String   @id @default(uuid()) @map("reply_id") @db.Uuid
+  discussionId String   @map("discussion_id") @db.Uuid
+  userId       String   @map("user_id")
+  body         String
+  parentId     String?  @map("parent_id") @db.Uuid
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  discussion Discussion            @relation(fields: [discussionId], references: [id], onDelete: Cascade)
+  user       UserProfile             @relation(fields: [userId], references: [userId], onDelete: Cascade)
+  parent     DiscussionReply?        @relation("ReplyThread", fields: [parentId], references: [id], onDelete: Cascade)
+  children   DiscussionReply[]       @relation("ReplyThread")
+  upVotes    DiscussionReplyUpVote[]
+
+  @@index([discussionId, createdAt])
+  @@map("discussion_reply")
+}
+
+model DiscussionUpVote {
+  discussionId String @map("discussion_id") @db.Uuid
+  userId       String @map("user_id")
+
+  discussion Discussion  @relation(fields: [discussionId], references: [id], onDelete: Cascade)
+  user       UserProfile @relation(fields: [userId], references: [userId], onDelete: Cascade)
+
+  @@id([discussionId, userId])
+  @@map("discussion_up_vote")
+}
+
+model DiscussionReplyUpVote {
+  replyId String @map("reply_id") @db.Uuid
+  userId  String @map("user_id")
+
+  reply DiscussionReply @relation(fields: [replyId], references: [id], onDelete: Cascade)
+  user  UserProfile     @relation(fields: [userId], references: [userId], onDelete: Cascade)
+
+  @@id([replyId, userId])
+  @@map("discussion_reply_up_vote")
+}

@@ -1,0 +1,89 @@
+model UserProfile {
+  userId        String   @id @map("user_id")
+  displayName   String?  @map("display_name")
+  avatarUrl     String?  @map("avatar_url")
+  isIncognito   Boolean  @default(false) @map("is_incognito")
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  genrePreferences       UserGenrePreference[]
+  tagPreferences         UserTagPreference[]
+  tasteProfile           UserTasteProfile?
+  animeEntries           UserAnimeEntry[]
+  discussions            Discussion[]
+  discussionReplies      DiscussionReply[]
+  discussionUpVotes      DiscussionUpVote[]
+  discussionReplyUpVotes DiscussionReplyUpVote[]
+  followers              Connection[]            @relation("FollowedUser")
+  following              Connection[]            @relation("FollowerUser")
+  activityEvents         ActivityEvent[]
+  recommendationSessions RecommendationSession[]
+  sharesSent             RecommendationShare[]   @relation("ShareFrom")
+  sharesReceived         RecommendationShare[]   @relation("ShareTo")
+  ownedCatalogs          Catalog[]
+
+  @@map("user_profile")
+}
+
+model UserGenrePreference {
+  userId  String @map("user_id")
+  genreId Int    @map("genre_id")
+  weight  Float
+
+  user  UserProfile @relation(fields: [userId], references: [userId], onDelete: Cascade)
+  genre Genre       @relation(fields: [genreId], references: [id], onDelete: Cascade)
+
+  @@id([userId, genreId])
+  @@map("user_genre_preference")
+}
+
+model UserTagPreference {
+  userId String @map("user_id")
+  tagId  Int    @map("tag_id")
+  weight Float
+
+  user UserProfile @relation(fields: [userId], references: [userId], onDelete: Cascade)
+  tag  Tag         @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([userId, tagId])
+  @@map("user_tag_preference")
+}
+
+model UserTasteProfile {
+  userId          String   @id @map("user_id")
+  summaryText     String?  @map("summary_text")
+  personalityJson Json?    @map("personality_json")
+  computedAt      DateTime @map("computed_at") @db.Timestamptz
+
+  user UserProfile @relation(fields: [userId], references: [userId], onDelete: Cascade)
+
+  @@map("user_taste_profile")
+}
+
+model UserAnimeEntry {
+  userId          String           @map("user_id")
+  animeId         String           @map("anime_id") @db.Uuid
+  status          AnimeEntryStatus
+  score           Int?
+  episodeProgress Int              @default(0) @map("episode_progress")
+  startDate       DateTime?        @map("start_date") @db.Date
+  finishDate      DateTime?        @map("finish_date") @db.Date
+  totalRewatches  Int              @default(0) @map("total_rewatches")
+
+  user  UserProfile @relation(fields: [userId], references: [userId], onDelete: Cascade)
+  anime Anime       @relation(fields: [animeId], references: [id], onDelete: Cascade)
+
+  @@id([userId, animeId])
+  @@index([userId, status])
+  @@map("user_anime_entry")
+}
+
+model Connection {
+  followerId  String @map("follower_id")
+  followingId String @map("following_id")
+
+  follower  UserProfile @relation("FollowerUser", fields: [followerId], references: [userId], onDelete: Cascade)
+  following UserProfile @relation("FollowedUser", fields: [followingId], references: [userId], onDelete: Cascade)
+
+  @@id([followerId, followingId])
+  @@map("connection")
+}
