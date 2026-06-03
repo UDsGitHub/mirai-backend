@@ -25,7 +25,7 @@ describe('AppController', () => {
   describe('root', () => {
     it('should return "Hello World!"', () => {
       const result = appController.getHello({
-        user: { sub: '123' },
+        userId: '123',
       } as AuthenticatedRequest);
       expect(result).toBe('Hello user 123!');
     });

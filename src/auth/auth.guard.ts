@@ -2,34 +2,27 @@ import {
   CanActivate,
   ExecutionContext,
   Injectable,
+  Logger,
   UnauthorizedException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import { GqlExecutionContext } from '@nestjs/graphql';
 import { Request } from 'express';
-import { AuthenticatedRequest } from './auth.interface';
+import { AuthenticatedRequest, GqlContext } from './auth.interface';
+import { verifyToken as clerkVerifyToken } from '@clerk/backend';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
-  private supabase: SupabaseClient | null = null;
-
   constructor(private readonly configService: ConfigService) {}
 
-  private getSupabaseClient(): SupabaseClient {
-    if (!this.supabase) {
-      const url = this.configService.get<string>('SUPABASE_URL');
-      const key = this.configService.get<string>('SUPABASE_SERVICE_ROLE_KEY');
-
-      if (!url || !key) {
-        throw new Error(
-          'SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY must be set',
-        );
-      }
-
-      this.supabase = createClient(url, key);
+  private getRequest(context: ExecutionContext): Request {
+    if (context.getType<'http' | 'graphql'>() === 'http') {
+      return context.switchToHttp().getRequest<Request>();
     }
 
-    return this.supabase;
+    const gqlContext =
+      GqlExecutionContext.create(context).getContext<GqlContext>();
+    return gqlContext.req;
   }
 
   private extractTokenFromHeader(request: Request): string | undefined {
@@ -38,21 +31,22 @@ export class AuthGuard implements CanActivate {
   }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const request = context.switchToHttp().getRequest<Request>();
+    const request = this.getRequest(context);
     const token = this.extractTokenFromHeader(request);
 
     if (!token) {
       throw new UnauthorizedException();
     }
 
-    const supabase = this.getSupabaseClient();
-    const { data, error } = await supabase.auth.getClaims(token);
+    const jwtPayload = await clerkVerifyToken(token, {
+      secretKey: this.configService.get<string>('CLERK_SECRET_KEY'),
+    });
 
-    if (error || !data?.claims) {
-      throw new UnauthorizedException('Invalid Supabase token');
+    if (!jwtPayload.sub) {
+      throw new UnauthorizedException();
     }
 
-    (request as AuthenticatedRequest).user = data.claims;
+    (request as AuthenticatedRequest).userId = jwtPayload.sub;
     return true;
   }
 }

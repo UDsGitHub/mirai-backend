@@ -10,6 +10,6 @@ export class AppController {
   @Get()
   @UseGuards(AuthGuard)
   getHello(@Req() request: AuthenticatedRequest): string {
-    return this.appService.getHello(request.user.sub);
+    return this.appService.getHello(request.userId);
   }
 }
