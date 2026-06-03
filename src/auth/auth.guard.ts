@@ -7,6 +7,7 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { Request } from 'express';
+import { AuthenticatedRequest } from './auth.interface';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -37,7 +38,7 @@ export class AuthGuard implements CanActivate {
   }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const request = context.switchToHttp().getRequest();
+    const request = context.switchToHttp().getRequest<Request>();
     const token = this.extractTokenFromHeader(request);
 
     if (!token) {
@@ -51,7 +52,7 @@ export class AuthGuard implements CanActivate {
       throw new UnauthorizedException('Invalid Supabase token');
     }
 
-    request.user = data.claims;
+    (request as AuthenticatedRequest).user = data.claims;
     return true;
   }
 }

@@ -3,6 +3,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule } from '@nestjs/config';
 import { AuthGuard } from './auth/auth.guard';
+import type { AuthenticatedRequest } from './auth/auth.interface';
 
 describe('AppController', () => {
   let appController: AppController;
@@ -22,8 +23,10 @@ describe('AppController', () => {
   });
 
   describe('root', () => {
-    it('should return "Hello World!"', async () => {
-      const result = await appController.getHello({ user: { sub: '123' } });
+    it('should return "Hello World!"', () => {
+      const result = appController.getHello({
+        user: { sub: '123' },
+      } as AuthenticatedRequest);
       expect(result).toBe('Hello user 123!');
     });
   });
