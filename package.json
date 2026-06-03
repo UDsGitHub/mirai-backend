@@ -40,7 +40,8 @@
     "graphql": "^16.14.1",
     "pg": "^8.21.0",
     "reflect-metadata": "^0.2.2",
-    "rxjs": "^7.8.1"
+    "rxjs": "^7.8.1",
+    "tsx": "^4.22.4"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",
@@ -57,6 +58,7 @@
     "eslint-config-prettier": "^10.0.1",
     "eslint-plugin-prettier": "^5.2.2",
     "globals": "^17.0.0",
+    "husky": "^9.1.7",
     "jest": "^30.0.0",
     "prettier": "^3.4.2",
     "prisma": "^7.8.0",
@@ -67,8 +69,7 @@
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
     "typescript": "^5.7.3",
-    "typescript-eslint": "^8.20.0",
-    "husky": "^9.1.7"
+    "typescript-eslint": "^8.20.0"
   },
   "jest": {
     "moduleFileExtensions": [
