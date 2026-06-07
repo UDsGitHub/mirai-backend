@@ -244,11 +244,12 @@ model RecommendationShare {
 }
 
 model UserProfile {
-  userId      String   @id @map("user_id")
-  displayName String?  @map("display_name")
-  avatarUrl   String?  @map("avatar_url")
-  isIncognito Boolean  @default(false) @map("is_incognito")
-  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz
+  userId      String    @id @map("user_id")
+  displayName String?   @map("display_name")
+  avatarUrl   String?   @map("avatar_url")
+  birthDate   DateTime? @map("birth_date") @db.Date
+  bio         String?   @map("bio")
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz
 
   genrePreferences       UserGenrePreference[]
   tagPreferences         UserTagPreference[]

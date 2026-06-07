@@ -242,7 +242,8 @@ exports.Prisma.UserProfileScalarFieldEnum = {
   userId: 'userId',
   displayName: 'displayName',
   avatarUrl: 'avatarUrl',
-  isIncognito: 'isIncognito',
+  birthDate: 'birthDate',
+  bio: 'bio',
   createdAt: 'createdAt'
 };
 
