@@ -2,6 +2,49 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type UserProfile {
+  userId: String!
+  displayName: String
+  avatarUrl: String
+  birthDate: DateTime!
+  genrePreferences: [Float!]!
+  tagPreferences: [Float!]!
+  bio: String
+  createdAt: DateTime!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
 type Query {
   hello: String!
+  user(id: String!): UserProfile
+}
+
+type Mutation {
+  createUser(createUserInput: CreateUserInput!): UserProfile!
+  updateUser(updateUserInput: UpdateUserInput!): UserProfile!
+  removeUser(id: String!): UserProfile!
+}
+
+input CreateUserInput {
+  userId: String!
+  displayName: String
+  avatarUrl: String
+  birthDate: DateTime!
+  genrePreferences: [Float!]!
+  tagPreferences: [Float!]!
+  bio: String
+}
+
+input UpdateUserInput {
+  userId: String!
+  displayName: String
+  avatarUrl: String
+  birthDate: DateTime
+  genrePreferences: [Float!]
+  tagPreferences: [Float!]
+  bio: String
 }

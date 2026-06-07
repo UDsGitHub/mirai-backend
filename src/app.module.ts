@@ -8,6 +8,7 @@ import { AppResolver } from './app.resolver';
 import { AppService } from './app.service';
 import { ConfigModule } from '@nestjs/config';
 import { AuthGuard } from './auth/auth.guard';
+import { UserModule } from './user/user.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { AuthGuard } from './auth/auth.guard';
         res,
       }),
     }),
+    UserModule,
   ],
   controllers: [AppController],
   providers: [AppService, AppResolver, AuthGuard],
