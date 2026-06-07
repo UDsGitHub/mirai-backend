@@ -3,26 +3,26 @@ import { ObjectType, Field } from '@nestjs/graphql';
 @ObjectType()
 export class UserProfile {
   @Field()
-  userId: string
+  userId: string;
 
   @Field({ nullable: true })
-  displayName?: string
+  displayName?: string;
 
   @Field({ nullable: true })
-  avatarUrl?: string
+  avatarUrl?: string;
 
   @Field()
-  birthDate: Date
+  birthDate: Date;
 
   @Field(() => [Number])
-  genrePreferences: number[]
+  genrePreferences: number[];
 
   @Field(() => [Number])
-  tagPreferences: number[]
+  tagPreferences: number[];
 
-  @Field({nullable: true})
-  bio?: string
+  @Field({ nullable: true })
+  bio?: string;
 
   @Field()
-  createdAt: Date
+  createdAt: Date;
 }

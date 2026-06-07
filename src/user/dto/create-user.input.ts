@@ -1,25 +1,25 @@
-import { InputType, Int, Field } from '@nestjs/graphql';
+import { InputType, Field } from '@nestjs/graphql';
 
 @InputType()
 export class CreateUserInput {
   @Field()
-  userId: string
+  userId: string;
 
   @Field({ nullable: true })
-  displayName?: string
+  displayName?: string;
 
   @Field({ nullable: true })
-  avatarUrl?: string
+  avatarUrl?: string;
 
   @Field()
-  birthDate: Date
+  birthDate: Date;
 
   @Field(() => [Number])
-  genrePreferences: number[]
+  genrePreferences: number[];
 
   @Field(() => [Number])
-  tagPreferences: number[]
+  tagPreferences: number[];
 
-  @Field({nullable: true})
-  bio?: string
+  @Field({ nullable: true })
+  bio?: string;
 }
