@@ -9,6 +9,7 @@ import { AppService } from './app.service';
 import { ConfigModule } from '@nestjs/config';
 import { AuthGuard } from './auth/auth.guard';
 import { UserModule } from './user/user.module';
+import { AnimeModule } from './anime/anime.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { UserModule } from './user/user.module';
       }),
     }),
     UserModule,
+    AnimeModule,
   ],
   controllers: [AppController],
   providers: [AppService, AppResolver, AuthGuard],

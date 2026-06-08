@@ -18,15 +18,36 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 """
 scalar DateTime
 
+type Anime {
+  """Example field (placeholder)"""
+  exampleField: Int!
+}
+
+type Genre {
+  id: Int!
+  name: String!
+}
+
+type Tag {
+  id: Int!
+  name: String!
+  category: String!
+  isAdult: Boolean!
+}
+
 type Query {
   hello: String!
   user(id: String!): UserProfile
+  tag: [Tag!]!
+  genre: [Genre!]!
+  anime(id: String!): Anime!
 }
 
 type Mutation {
   createUser(createUserInput: CreateUserInput!): UserProfile!
   updateUser(updateUserInput: UpdateUserInput!): UserProfile!
   removeUser(id: String!): UserProfile!
+  removeAnime(id: String!): Anime!
 }
 
 input CreateUserInput {

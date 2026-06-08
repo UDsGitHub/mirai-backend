@@ -2,7 +2,12 @@ import 'dotenv/config';
 import { Pool } from 'pg';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from '../src/generated/prisma/client';
-import { anilistGenres, anilistTags } from './data';
+import {
+  anilistGenres,
+  anilistTags,
+  EXCLUDED_ANILIST_GENRE_NAMES,
+  EXCLUDED_ANILIST_TAG_CATEGORIES,
+} from './data';
 
 const connectionString = `${process.env.DATABASE_URL}`;
 const pool = new Pool({ connectionString });
@@ -10,13 +15,18 @@ const adapter = new PrismaPg(pool);
 const prisma = new PrismaClient({ adapter });
 
 async function main() {
+  await prisma.animeTag.deleteMany();
+  await prisma.userTagPreference.deleteMany();
+  await prisma.tag.deleteMany();
+  await prisma.animeGenre.deleteMany();
+  await prisma.genre.deleteMany();
+
   const tags = await prisma.tag.createMany({
     data: anilistTags
       .filter(
         (tag) =>
           !tag.isAdult &&
-          tag.category !== 'Technical' &&
-          tag.category !== 'Sexual Content',
+          !EXCLUDED_ANILIST_TAG_CATEGORIES.includes(tag.category),
       )
       .map((tag) => ({
         externalId: tag.id,
@@ -26,9 +36,11 @@ async function main() {
       })),
   });
   const genres = await prisma.genre.createMany({
-    data: anilistGenres.map((genre) => ({
-      name: genre,
-    })),
+    data: anilistGenres
+      .filter((genre) => !EXCLUDED_ANILIST_GENRE_NAMES.includes(genre))
+      .map((genre) => ({
+        name: genre,
+      })),
   });
   console.log({ tags, genres });
 }
