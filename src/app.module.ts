@@ -10,6 +10,7 @@ import { ConfigModule } from '@nestjs/config';
 import { AuthGuard } from './auth/auth.guard';
 import { UserModule } from './user/user.module';
 import { AnimeModule } from './anime/anime.module';
+import { AnilistModule } from './anilist/anilist.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { AnimeModule } from './anime/anime.module';
     }),
     UserModule,
     AnimeModule,
+    AnilistModule,
   ],
   controllers: [AppController],
   providers: [AppService, AppResolver, AuthGuard],

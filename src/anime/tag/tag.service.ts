@@ -8,4 +8,10 @@ export class TagService {
   async findAll() {
     return this.prisma.tag.findMany();
   }
+  
+  async findAllById(ids?: number[]) {
+    return this.prisma.tag.findMany({
+      where: ids ? { id: { in: ids } } : undefined,
+    });
+  }
 }

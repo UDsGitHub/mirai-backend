@@ -19,8 +19,19 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 scalar DateTime
 
 type Anime {
-  """Example field (placeholder)"""
-  exampleField: Int!
+  id: String!
+  titleRomaji: String!
+  titleEnglish: String!
+  synopsis: String!
+  episodeCount: Int!
+  status: String!
+  season: String!
+  seasonYear: Int!
+  averageScore: Float!
+  popularity: Int!
+  bannerUrl: String!
+  coverUrl: String!
+  trailerUrl: String!
 }
 
 type Genre {
@@ -35,11 +46,29 @@ type Tag {
   isAdult: Boolean!
 }
 
+type Recommendation {
+  id: String!
+  titleRomaji: String!
+  titleEnglish: String!
+  synopsis: String!
+  episodeCount: Int!
+  status: String!
+  season: String!
+  seasonYear: Int!
+  averageScore: Float!
+  popularity: Int!
+  bannerUrl: String!
+  coverUrl: String!
+  trailerUrl: String!
+  matchPercentage: Float!
+}
+
 type Query {
   hello: String!
   user(id: String!): UserProfile
   tag: [Tag!]!
   genre: [Genre!]!
+  recommendation: [Recommendation!]!
   anime(id: String!): Anime!
 }
 

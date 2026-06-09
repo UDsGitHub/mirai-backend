@@ -8,4 +8,10 @@ export class GenreService {
   async findAll() {
     return this.prisma.genre.findMany();
   }
+
+  async findAllById(ids?: number[]) {
+    return this.prisma.genre.findMany({
+      where: ids ? { id: { in: ids } } : undefined,
+    });
+  }
 }
