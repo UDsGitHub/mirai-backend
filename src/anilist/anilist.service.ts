@@ -1,90 +1,116 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from 'src/prisma.service';
+import { PrismaService } from '../prisma.service';
+import { GET_ANIME_PREVIEW_RECOMMENDATIONS } from '../anime/recommendation/recommendation.query';
 import { AnilistClient } from './anilist.client';
-import { GetAnimeRecommendationsByFilter } from '../anime/recommendation/recommendation.query';
-import { Recommendation } from 'src/anime/entities/recommendation.entity';
-import { TagService } from 'src/anime/tag/tag.service';
-import { GetAnimePreviewRecommendationsResponse } from './anilist.types';
+import {
+  AnilistMedia,
+  AnilistPreviewQueryResult,
+  SyncedAnimeWithRelations,
+} from './anilist.types';
 
 @Injectable()
 export class AnilistService {
   constructor(
     private readonly anilistClient: AnilistClient,
     private readonly prisma: PrismaService,
-    private readonly tagService: TagService,
   ) {}
 
-  async getAnimePreviewRecommendations(
-    genres: string[],
-    tags: string[],
-    limit: number,
-  ) {
-    const rawAniListResponse = (await this.anilistClient.query(
-      GetAnimeRecommendationsByFilter,
+  async fetchAndSyncPreviewMedia(
+    genreNames: string[],
+    tagNames: string[],
+    perPage: number,
+  ): Promise<SyncedAnimeWithRelations[]> {
+    const response = await this.anilistClient.query<AnilistPreviewQueryResult>(
+      GET_ANIME_PREVIEW_RECOMMENDATIONS,
       {
-        genres,
-        tags,
+        genreIn: genreNames,
+        tagIn: tagNames,
+        perPage,
       },
-    )) as any[];
+    );
 
-    console.log(rawAniListResponse);
+    return this.syncMediaBatch(response.Page.media);
+  }
+
+  private async syncMediaBatch(
+    media: AnilistMedia[],
+  ): Promise<SyncedAnimeWithRelations[]> {
+    if (media.length === 0) {
+      return [];
+    }
 
     return this.prisma.$transaction(async (tx) => {
-      const animeGenresAndTags = {};
-      const response: GetAnimePreviewRecommendationsResponse[] = []
+      const results: SyncedAnimeWithRelations[] = [];
 
-      const parsedAnime = rawAniListResponse.slice(limit).map(async (anime) => {
-        const tagIds = (
-          await this.tagService.findAllById(anime.tags.map((tag) => tag.id))
-        ).map((tag) => tag.id);
-
-        animeGenresAndTags[anime.externalId] = {
-          genres: anime.genres,
-          tags: tagIds,
-        };
-
-        return {
-          externalId: anime.externalId,
-          titleRomaji: anime.title.romaji,
-          titleEnglish: anime.title.english,
-          synopsis: anime.description,
-          episodeCount: anime.episodes,
-          status: anime.status,
-          season: anime.season,
-          seasonYear: anime.seasonYear,
-          averageScore: anime.averageScore,
-          popularity: anime.popularity,
-          bannerUrl: anime.bannerImage,
-          coverUrl: anime.coverImage,
-          trailerUrl: anime.trailer.site,
-          syncedAt: new Date(),
-        };
-      });
-
-      const insertedAnime = await this.prisma.anime.createManyAndReturn({
-        data: parsedAnime,
-        skipDuplicates: true,
-      });
-
-      insertedAnime.forEach(async (anime) => {
-        const insertedGenre = await this.prisma.animeGenre.createManyAndReturn({
-          data: animeGenresAndTags[anime.externalId].genres,
-          skipDuplicates: true
+      for (const item of media) {
+        const animeData = this.toAnimeData(item);
+        const anime = await tx.anime.upsert({
+          where: { externalId: item.id },
+          create: animeData,
+          update: animeData,
         });
-        const insertedTags = await this.prisma.animeTag.createManyAndReturn({
-          data: insertedAnime.map(
-            (anime) => animeGenresAndTags[anime.externalId].tags,
-          ),
-          skipDuplicates: true
+
+        const genreRecords = await tx.genre.findMany({
+          where: { name: { in: item.genres } },
         });
-        response.push({
-            ...insertedAnime,
-            genres: insertedGenre,
-            tags: insertedTags
-        })
-      });
-      
-      return response
+
+        await tx.animeGenre.deleteMany({ where: { animeId: anime.id } });
+        if (genreRecords.length > 0) {
+          await tx.animeGenre.createMany({
+            data: genreRecords.map((genre) => ({
+              animeId: anime.id,
+              genreId: genre.id,
+            })),
+            skipDuplicates: true,
+          });
+        }
+
+        const tagExternalIds = item.tags.map((tag) => tag.id);
+        const tagRecords = await tx.tag.findMany({
+          where: { externalId: { in: tagExternalIds } },
+        });
+
+        await tx.animeTag.deleteMany({ where: { animeId: anime.id } });
+        if (tagRecords.length > 0) {
+          await tx.animeTag.createMany({
+            data: tagRecords.map((tag) => ({
+              animeId: anime.id,
+              tagId: tag.id,
+            })),
+            skipDuplicates: true,
+          });
+        }
+
+        const genres = await tx.animeGenre.findMany({
+          where: { animeId: anime.id },
+        });
+        const tags = await tx.animeTag.findMany({
+          where: { animeId: anime.id },
+        });
+
+        results.push({ ...anime, genres, tags });
+      }
+
+      return results;
     });
+  }
+
+  private toAnimeData(media: AnilistMedia) {
+    return {
+      externalId: media.id,
+      titleRomaji: media.title.romaji,
+      titleEnglish: media.title.english,
+      synopsis: media.description,
+      episodeCount: media.episodes,
+      status: media.status,
+      season: media.season,
+      seasonYear: media.seasonYear,
+      averageScore: media.averageScore,
+      popularity: media.popularity,
+      bannerUrl: media.bannerImage,
+      coverUrl: media.coverImage?.large ?? media.coverImage?.medium ?? null,
+      trailerUrl: media.trailer?.site ?? null,
+      syncedAt: new Date(),
+    };
   }
 }

@@ -21,17 +21,17 @@ scalar DateTime
 type Anime {
   id: String!
   titleRomaji: String!
-  titleEnglish: String!
-  synopsis: String!
-  episodeCount: Int!
-  status: String!
-  season: String!
-  seasonYear: Int!
-  averageScore: Float!
-  popularity: Int!
-  bannerUrl: String!
-  coverUrl: String!
-  trailerUrl: String!
+  titleEnglish: String
+  synopsis: String
+  episodeCount: Int
+  status: String
+  season: String
+  seasonYear: Int
+  averageScore: Float
+  popularity: Int
+  bannerUrl: String
+  coverUrl: String
+  trailerUrl: String
 }
 
 type Genre {
@@ -49,17 +49,19 @@ type Tag {
 type Recommendation {
   id: String!
   titleRomaji: String!
-  titleEnglish: String!
-  synopsis: String!
-  episodeCount: Int!
-  status: String!
-  season: String!
-  seasonYear: Int!
-  averageScore: Float!
-  popularity: Int!
-  bannerUrl: String!
-  coverUrl: String!
-  trailerUrl: String!
+  titleEnglish: String
+  synopsis: String
+  episodeCount: Int
+  status: String
+  season: String
+  seasonYear: Int
+  averageScore: Float
+  popularity: Int
+  bannerUrl: String
+  coverUrl: String
+  trailerUrl: String
+  genres: [String!]
+  tags: [String!]
   matchPercentage: Float!
 }
 
@@ -68,8 +70,14 @@ type Query {
   user(id: String!): UserProfile
   tag: [Tag!]!
   genre: [Genre!]!
-  recommendation: [Recommendation!]!
+  previewRecommendations(input: PreviewRecommendationsInput!): [Recommendation!]!
   anime(id: String!): Anime!
+}
+
+input PreviewRecommendationsInput {
+  genreIds: [Int!]! = []
+  tagIds: [Int!]! = []
+  limit: Int! = 6
 }
 
 type Mutation {

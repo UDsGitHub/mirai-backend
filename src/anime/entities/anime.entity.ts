@@ -8,36 +8,36 @@ export class Anime {
   @Field(() => String)
   titleRomaji: string;
 
-  @Field(() => String)
-  titleEnglish: string;
+  @Field(() => String, { nullable: true })
+  titleEnglish?: string | null;
 
-  @Field(() => String)
-  synopsis: string;
+  @Field(() => String, { nullable: true })
+  synopsis?: string | null;
 
-  @Field(() => Int)
-  episodeCount: number;
+  @Field(() => Int, { nullable: true })
+  episodeCount?: number | null;
 
-  @Field(() => String)
-  status: string;
+  @Field(() => String, { nullable: true })
+  status?: string | null;
 
-  @Field(() => String)
-  season: string;
+  @Field(() => String, { nullable: true })
+  season?: string | null;
 
-  @Field(() => Int)
-  seasonYear: number;
+  @Field(() => Int, { nullable: true })
+  seasonYear?: number | null;
 
-  @Field(() => Float)
-  averageScore: number;
+  @Field(() => Float, { nullable: true })
+  averageScore?: number | null;
 
-  @Field(() => Int)
-  popularity: number;
+  @Field(() => Int, { nullable: true })
+  popularity?: number | null;
 
-  @Field(() => String)
-  bannerUrl: string;
+  @Field(() => String, { nullable: true })
+  bannerUrl?: string | null;
 
-  @Field(() => String)
-  coverUrl: string;
+  @Field(() => String, { nullable: true })
+  coverUrl?: string | null;
 
-  @Field(() => String)
-  trailerUrl: string;
+  @Field(() => String, { nullable: true })
+  trailerUrl?: string | null;
 }

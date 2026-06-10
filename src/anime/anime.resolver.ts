@@ -15,7 +15,7 @@ export class AnimeResolver {
     private readonly animeService: AnimeService,
     private readonly tagService: TagService,
     private readonly genreService: GenreService,
-    private readonly recommendationService: RecommendationService
+    private readonly recommendationService: RecommendationService,
   ) {}
 
   @Query(() => [Tag], { name: 'tag' })
@@ -28,9 +28,9 @@ export class AnimeResolver {
     return this.genreService.findAll();
   }
 
-  @Query(() => [Recommendation], {name: 'recommendation'})
+  @Query(() => [Recommendation], { name: 'previewRecommendations' })
   getPreviewRecommendations(@Args('input') input: PreviewRecommendationsInput) {
-    return this.recommendationService.getPreviewRecommendations(input)
+    return this.recommendationService.getPreviewRecommendations(input);
   }
 
   @Query(() => [Anime], { name: 'anime' })

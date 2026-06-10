@@ -1,13 +1,24 @@
-import { Field, InputType, Int } from "@nestjs/graphql"
+import { Field, InputType, Int } from '@nestjs/graphql';
+import { IsArray, IsInt, IsOptional, Max, Min } from 'class-validator';
 
 @InputType()
 export class PreviewRecommendationsInput {
-    @Field(() => [Int])
-    genreIds: number[] = []
+  @Field(() => [Int], { defaultValue: [] })
+  @IsOptional()
+  @IsArray()
+  @IsInt({ each: true })
+  genreIds: number[] = [];
 
-    @Field(() => [Int])
-    tagIds: number[] = []
+  @Field(() => [Int], { defaultValue: [] })
+  @IsOptional()
+  @IsArray()
+  @IsInt({ each: true })
+  tagIds: number[] = [];
 
-    @Field(() => Int)
-    limit: number = 6
+  @Field(() => Int, { defaultValue: 6 })
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  @Max(50)
+  limit: number = 6;
 }

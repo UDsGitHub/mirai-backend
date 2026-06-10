@@ -1,29 +1,44 @@
-export const GetAnimeRecommendationsByFilter = `
-    query AnimePreviewRecommendations($genres: [Int], $genre_in: [String] $tag_in: [String]) {
-        Media (type: ANIME, genre_in: $genres, tag_in: $tags, sort: [SCORE_DESC, POPULARITY_DESC]) {
-            id
-            title {
-                english
-                romaji
-            }
-            description
-            genres
-            tags {
-                id
-            }
-            episodes
-            status
-            season
-            seasonYear
-            averageScore
-            popularity
-            bannerImage
-            coverImage {
-                medium
-            }
-            trailer {
-                site
-            }
+export const GET_ANIME_PREVIEW_RECOMMENDATIONS = `
+  query AnimePreviewRecommendations(
+    $genreIn: [String]
+    $tagIn: [String]
+    $perPage: Int
+  ) {
+    Page(page: 1, perPage: $perPage) {
+      media(
+        type: ANIME
+        genre_in: $genreIn
+        tag_in: $tagIn
+        sort: [POPULARITY_DESC, SCORE_DESC]
+        isAdult: false
+      ) {
+        id
+        title {
+          romaji
+          english
         }
+        description(asHtml: false)
+        episodes
+        status
+        season
+        seasonYear
+        averageScore
+        popularity
+        bannerImage
+        coverImage {
+          large
+          medium
+        }
+        trailer {
+          id
+          site
+        }
+        genres
+        tags {
+          id
+          name
+        }
+      }
     }
-`
+  }
+`;
